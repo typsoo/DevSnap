@@ -1,0 +1,18 @@
+use clap::{Parser, Subcommand};
+
+#[derive(Parser, Debug)]
+#[command(name = "devsnap")]
+#[command(about = "Developer Workspace Snapshot CLI", long_about = None)]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum Commands {
+    Save { name: String },
+    Restore { name: String },
+    List,
+    Delete { name: String },
+    Show { name: String },
+}
