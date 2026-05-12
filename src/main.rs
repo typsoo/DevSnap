@@ -1,11 +1,8 @@
+pub mod apps_state_manager;
 mod cli;
+pub mod data_model;
 mod handlers;
 mod storage_creator;
-use crate::apps_state_manager::session_files_finder::{
-    get_active_session_path, get_firefox_base_dir,
-};
-
-pub mod apps_state_manager;
 
 use clap::Parser;
 use cli::Cli;
@@ -19,4 +16,30 @@ fn main() {
     let cli = Cli::parse();
 
     handlers::handle_command(cli.command);
+}
+
+#[cfg(test)]
+mod tests {
+    use std::process::Command;
+
+    #[test]
+    fn test() {
+        println!("Launching...");
+
+        // Command::new принимает имя исполняемого файла (например, "firefox" или "code")
+        let result = Command::new("firefox")
+            // .args() принимает вектор строк (наши URL-адреса или пути к папкам)
+            .arg("https://github.com/leonardomso/rust-skills")
+            // .spawn() запускает процесс отвязанно от нашего CLI
+            .status();
+
+        match result {
+            Ok(child) => {
+                println!("Successfully launched firefox (PID: {})", child);
+            }
+            Err(e) => {
+                eprintln!("Failed to launch: {}", e);
+            }
+        }
+    }
 }

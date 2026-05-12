@@ -1,3 +1,5 @@
+use crate::data_model::Workspace;
+use anyhow::{Context, Result, anyhow};
 use std::fs;
 use std::io;
 use std::path::PathBuf;
@@ -8,6 +10,17 @@ pub fn get_snapshots_dir() -> Option<PathBuf> {
         path.push("snapshots");
         path
     })
+}
+
+pub fn save_snapshot(workspace: &Workspace) -> Result<()> {
+    let dir =
+        get_snapshots_dir().ok_or_else(|| anyhow!("Failed to determine snapshots directory"))?;
+
+    let file_path = dir.join(format!("{}.json", workspace.name));
+    let json = serde_json::to_string_pretty(workspace).context("Failed to serialize workspace")?;
+
+    fs::write(file_path, json).context("Failed to write snapshot file")?;
+    Ok(())
 }
 
 pub fn init_user_env() -> io::Result<()> {
