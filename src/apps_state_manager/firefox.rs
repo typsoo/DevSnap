@@ -12,6 +12,7 @@ pub struct FirefoxSession {
 pub struct Window {
     #[serde(default)]
     pub tabs: Vec<Tab>,
+    pub selected: usize,
 }
 
 #[derive(Debug, Deserialize)]
@@ -45,26 +46,52 @@ impl AppStateHandler for FirefoxStateHandler {
         let decompressed = lz4_flex::decompress_size_prepended(&bytes[8..]).ok()?;
         let session: FirefoxSession = serde_json::from_slice(&decompressed).ok()?;
 
-        let urls: Vec<String> = session
+        let apps: Vec<Application> = session
             .windows
             .into_iter()
-            .flat_map(|w| w.tabs)
-            .filter_map(|t| {
-                t.entries
-                    .get(t.index.saturating_sub(1))
-                    .map(|e| e.url.clone())
+            .filter_map(|w| {
+                let tab_titles: Vec<String> = w
+                    .tabs
+                    .iter()
+                    .take(3)
+                    .filter_map(|t| t.entries.get(t.index.saturating_sub(1)))
+                    .filter_map(|e| e.title.clone())
+                    .collect();
+
+                let window_title = if tab_titles.is_empty() {
+                    "Firefox Window (Empty)".to_string()
+                } else {
+                    let mut title = tab_titles.join(", ");
+                    if w.tabs.len() > 3 {
+                        title.push_str(&format!(" (+{} more)", w.tabs.len() - 3));
+                    }
+                    title
+                };
+
+                let urls: Vec<String> = w
+                    .tabs
+                    .into_iter()
+                    .filter_map(|t| {
+                        t.entries
+                            .get(t.index.saturating_sub(1))
+                            .map(|e| e.url.clone())
+                    })
+                    .collect();
+
+                if urls.is_empty() {
+                    None
+                } else {
+                    Some(Application {
+                        command: "firefox".to_string(),
+                        args: urls,
+                        title: Some(window_title),
+                        workspace_id: None,
+                    })
+                }
             })
             .collect();
 
-        if urls.is_empty() {
-            return None;
-        }
-
-        Some(vec![Application {
-            command: "firefox".to_string(),
-            args: urls,
-            workspace_id: None,
-        }])
+        if apps.is_empty() { None } else { Some(apps) }
     }
 }
 

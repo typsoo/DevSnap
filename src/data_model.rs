@@ -1,15 +1,17 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Workspace {
     pub name: String,
     pub applications: Vec<Application>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Application {
     pub command: String,
     pub args: Vec<String>,
+    #[serde(default)]
+    pub title: Option<String>,
     // Future-proofing: Optional fields for exact window placement
     pub workspace_id: Option<u32>,
     //pub geometry: Option<WindowGeometry>,

@@ -5,10 +5,8 @@ use crate::apps_state_manager::firefox::FirefoxStateHandler;
 use crate::data_model::Application;
 
 pub trait AppStateHandler {
-    /// Возвращает имя приложения (например, "firefox")
     fn target_app_name(&self) -> &'static str;
 
-    /// Собирает специфичные данные и превращает их в команды запуска
     fn capture_state(&self) -> Option<Vec<Application>>;
 }
 
