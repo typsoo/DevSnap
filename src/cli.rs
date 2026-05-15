@@ -13,6 +13,6 @@ pub enum Commands {
     Save { name: String },
     Restore { name: String },
     List,
-    Delete { name: String },
+    Delete,
     Show { name: String },
 }

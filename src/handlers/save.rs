@@ -4,7 +4,6 @@ use crate::storage_creator;
 use anyhow::Result;
 use dialoguer::{MultiSelect, theme::ColorfulTheme};
 
-//change clones
 pub fn handle_save(name: String) -> Result<()> {
     let mut applications = apps_state_manager::collect_all_states();
 
@@ -19,15 +18,14 @@ pub fn handle_save(name: String) -> Result<()> {
             .map(|app| app.title.as_deref().unwrap_or(&app.command).to_string())
             .collect();
 
-        let chosen = MultiSelect::with_theme(&ColorfulTheme::default())
+        let Some(chosen) = MultiSelect::with_theme(&ColorfulTheme::default())
             .with_prompt("Select windows to save (Space to select, Enter to confirm)")
             .items(&items)
-            .interact()?;
-
-        if chosen.is_empty() {
-            println!("No windows selected. Save cancelled.");
+            .interact_opt()?
+        else {
+            println!("Selection cancelled.");
             return Ok(());
-        }
+        };
 
         applications = chosen
             .into_iter()

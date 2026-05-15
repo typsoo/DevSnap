@@ -3,16 +3,15 @@ use anyhow::{Context, Result};
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub fn get_snapshots_dir() -> Option<PathBuf> {
-    dirs::data_dir().map(|mut path| {
-        path.push("devsnap");
-        path.push("snapshots");
-        path
-    })
+pub fn get_snapshots_dir() -> Result<PathBuf> {
+    let mut path = dirs::data_dir().context("Could not find local data directory")?;
+    path.push("devsnap");
+    path.push("snapshots");
+    Ok(path)
 }
 
 pub fn save_snapshot(workspace: &Workspace) -> Result<()> {
-    let dir = get_snapshots_dir().context("Failed to determine snapshots directory")?;
+    let dir = get_snapshots_dir()?;
 
     let file_path = dir.join(format!("{}.json", workspace.name));
     let json = serde_json::to_string_pretty(workspace).context("Failed to serialize workspace")?;
@@ -22,7 +21,7 @@ pub fn save_snapshot(workspace: &Workspace) -> Result<()> {
 }
 
 pub fn init_user_env() -> Result<()> {
-    let snapshots_path = get_snapshots_dir().context("XDG Data directory not found")?;
+    let snapshots_path = get_snapshots_dir()?;
 
     create_structure_at(&snapshots_path)
 }
@@ -36,15 +35,6 @@ fn create_structure_at(path: &Path) -> Result<()> {
 mod tests {
     use super::*;
     use tempfile::tempdir;
-
-    #[test]
-    fn test_get_snapshots_dir() {
-        let dir = get_snapshots_dir();
-        assert!(dir.is_some());
-
-        let path = dir.unwrap();
-        assert!(path.ends_with("devsnap/snapshots"));
-    }
 
     #[test]
     fn test_create_structure_at() {

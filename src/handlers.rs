@@ -1,3 +1,5 @@
+pub mod delete;
+pub mod restore;
 pub mod save;
 
 use crate::cli::Commands;
@@ -10,13 +12,17 @@ pub fn handle_command(command: Commands) {
             }
         }
         Commands::Restore { name } => {
-            println!("Action: Delegate restoring workspace '{}' to backend", name);
+            if let Err(e) = restore::handle_restore(name) {
+                eprintln!("Error restoring workspace: {}", e);
+            }
         }
         Commands::List => {
             println!("Action: Delegate listing workspaces to backend");
         }
-        Commands::Delete { name } => {
-            println!("Action: Delegate deleting workspace '{}' to backend", name);
+        Commands::Delete {} => {
+            if let Err(e) = delete::handle_delete() {
+                eprintln!("Error deleting workspace: {}", e);
+            }
         }
         Commands::Show { name } => {
             println!(
