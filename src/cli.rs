@@ -11,7 +11,7 @@ pub struct Cli {
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     Save { name: String },
-    Restore { name: String },
+    Restore,
     List,
     Delete,
     Show { name: String },

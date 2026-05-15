@@ -1,5 +1,5 @@
 use crate::data_model::Workspace;
-use crate::storage_creator::get_snapshots_dir;
+use crate::storage_operations::get_snapshots_dir;
 use anyhow::{Context, Result};
 use std::fs;
 

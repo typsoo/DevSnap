@@ -1,14 +1,8 @@
 use crate::data_model::Workspace;
+use crate::storage_operations::get_snapshots_dir;
 use anyhow::{Context, Result};
 use std::fs;
-use std::path::{Path, PathBuf};
-
-pub fn get_snapshots_dir() -> Result<PathBuf> {
-    let mut path = dirs::data_dir().context("Could not find local data directory")?;
-    path.push("devsnap");
-    path.push("snapshots");
-    Ok(path)
-}
+use std::path::Path;
 
 pub fn save_snapshot(workspace: &Workspace) -> Result<()> {
     let dir = get_snapshots_dir()?;

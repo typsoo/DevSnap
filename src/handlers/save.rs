@@ -1,6 +1,6 @@
 use crate::apps_state_manager;
 use crate::data_model::Workspace;
-use crate::storage_creator;
+use crate::storage_operations::storage_creator;
 use anyhow::Result;
 use dialoguer::{MultiSelect, theme::ColorfulTheme};
 

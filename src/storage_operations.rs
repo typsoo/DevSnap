@@ -1,6 +1,10 @@
-use crate::storage_creator::get_snapshots_dir;
 use anyhow::{Context, Result};
 use std::fs;
+use std::path::PathBuf;
+
+pub mod storage_creator;
+pub mod storage_deleter;
+pub mod storage_loader;
 
 pub fn list_snapshots() -> Result<Vec<String>> {
     let dir = get_snapshots_dir()?;
@@ -28,12 +32,9 @@ pub fn list_snapshots() -> Result<Vec<String>> {
     Ok(snapshots)
 }
 
-pub fn delete_snapshot(name: &str) -> Result<()> {
-    let dir = get_snapshots_dir()?;
-    let file_path = dir.join(format!("{}.json", name));
-
-    fs::remove_file(&file_path)
-        .with_context(|| format!("Failed to delete snapshot file at {:?}", file_path))?;
-
-    Ok(())
+fn get_snapshots_dir() -> Result<PathBuf> {
+    let mut path = dirs::data_dir().context("Could not find local data directory")?;
+    path.push("devsnap");
+    path.push("snapshots");
+    Ok(path)
 }

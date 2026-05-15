@@ -1,10 +1,15 @@
-use crate::storage_loader::load_snapshot;
+use crate::handlers::select_workspace;
+use crate::storage_operations::storage_loader::load_snapshot;
+
 use anyhow::{Result, anyhow};
 use std::process::Command;
 
-pub fn handle_restore(name: String) -> Result<()> {
-    let workspace = load_snapshot(&name)?;
+pub fn handle_restore() -> Result<()> {
+    let Some(name) = select_workspace("restore")? else {
+        return Ok(());
+    };
 
+    let workspace = load_snapshot(&name)?;
     if workspace.applications.is_empty() {
         println!("Workspace '{}' is empty. Nothing to restore.", name);
         return Ok(());

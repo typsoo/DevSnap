@@ -3,6 +3,8 @@ pub mod restore;
 pub mod save;
 
 use crate::cli::Commands;
+use anyhow::{Context, Result};
+use dialoguer::{Select, theme::ColorfulTheme};
 
 pub fn handle_command(command: Commands) {
     match command {
@@ -11,8 +13,8 @@ pub fn handle_command(command: Commands) {
                 eprintln!("Error saving workspace: {}", e);
             }
         }
-        Commands::Restore { name } => {
-            if let Err(e) = restore::handle_restore(name) {
+        Commands::Restore {} => {
+            if let Err(e) = restore::handle_restore() {
                 eprintln!("Error restoring workspace: {}", e);
             }
         }
@@ -31,4 +33,32 @@ pub fn handle_command(command: Commands) {
             );
         }
     }
+}
+
+fn select_workspace(action_name: &str) -> Result<Option<String>> {
+    let workspaces = crate::storage_operations::list_snapshots()?;
+
+    if workspaces.is_empty() {
+        println!("No saved workspaces found. Nothing to {}.", action_name);
+        return Ok(None);
+    }
+
+    let Some(index) = choose_workspace(&workspaces, &action_name)? else {
+        println!("Operation cancelled.");
+        return Ok(None);
+    };
+
+    Ok(Some(workspaces[index].clone()))
+}
+
+fn choose_workspace(workspaces: &[String], action_name: &str) -> Result<Option<usize>> {
+    Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(format!(
+            "Select a workspace to {} (Use arrow keys and Enter, Esc to cancel)",
+            action_name.to_uppercase()
+        ))
+        .default(0)
+        .items(&workspaces)
+        .interact_opt()
+        .context("Error with elements selecting")
 }
