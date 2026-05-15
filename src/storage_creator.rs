@@ -1,8 +1,7 @@
 use crate::data_model::Workspace;
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Context, Result};
 use std::fs;
-use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub fn get_snapshots_dir() -> Option<PathBuf> {
     dirs::data_dir().map(|mut path| {
@@ -13,8 +12,7 @@ pub fn get_snapshots_dir() -> Option<PathBuf> {
 }
 
 pub fn save_snapshot(workspace: &Workspace) -> Result<()> {
-    let dir =
-        get_snapshots_dir().ok_or_else(|| anyhow!("Failed to determine snapshots directory"))?;
+    let dir = get_snapshots_dir().context("Failed to determine snapshots directory")?;
 
     let file_path = dir.join(format!("{}.json", workspace.name));
     let json = serde_json::to_string_pretty(workspace).context("Failed to serialize workspace")?;
@@ -23,15 +21,15 @@ pub fn save_snapshot(workspace: &Workspace) -> Result<()> {
     Ok(())
 }
 
-pub fn init_user_env() -> io::Result<()> {
-    let snapshots_path = get_snapshots_dir()
-        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "XDG Data directory not found"))?;
+pub fn init_user_env() -> Result<()> {
+    let snapshots_path = get_snapshots_dir().context("XDG Data directory not found")?;
 
     create_structure_at(&snapshots_path)
 }
 
-fn create_structure_at(path: &PathBuf) -> io::Result<()> {
+fn create_structure_at(path: &Path) -> Result<()> {
     fs::create_dir_all(path)
+        .with_context(|| format!("Failed to create directory structure at {:?}", path))
 }
 
 #[cfg(test)]

@@ -4,6 +4,7 @@ use crate::storage_creator;
 use anyhow::Result;
 use dialoguer::{MultiSelect, theme::ColorfulTheme};
 
+//change clones
 pub fn handle_save(name: String) -> Result<()> {
     let mut applications = apps_state_manager::collect_all_states();
 
@@ -15,7 +16,7 @@ pub fn handle_save(name: String) -> Result<()> {
     if applications.len() > 1 {
         let items: Vec<String> = applications
             .iter()
-            .map(|app| app.title.clone().unwrap_or_else(|| app.command.clone()))
+            .map(|app| app.title.as_deref().unwrap_or(&app.command).to_string())
             .collect();
 
         let chosen = MultiSelect::with_theme(&ColorfulTheme::default())

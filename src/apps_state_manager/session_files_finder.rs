@@ -1,14 +1,17 @@
+use anyhow::{Context, Result};
 use ini::Ini;
 use std::path::PathBuf;
 
-pub fn get_firefox_base_dir() -> Option<PathBuf> {
+pub fn get_firefox_base_dir() -> Result<PathBuf> {
     #[cfg(target_os = "linux")]
     {
-        dirs::home_dir().map(|mut p| {
-            p.push(".mozilla");
-            p.push("firefox");
-            p
-        })
+        dirs::home_dir()
+            .map(|mut p| {
+                p.push(".mozilla");
+                p.push("firefox");
+                p
+            })
+            .context("Failed to determine home directory")
     }
 
     #[cfg(not(target_os = "linux"))]
@@ -17,18 +20,21 @@ pub fn get_firefox_base_dir() -> Option<PathBuf> {
     }
 }
 
-pub fn get_active_session_path() -> Option<PathBuf> {
+pub fn get_active_session_path() -> Result<PathBuf> {
     let base_dir = get_firefox_base_dir()?;
-    let conf = Ini::load_from_file(base_dir.join("profiles.ini")).ok()?;
+    let profiles_ini_path = base_dir.join("profiles.ini");
 
-    let profile_dir = find_install_default(&conf).or_else(|| find_legacy_default(&conf))?;
+    let conf = Ini::load_from_file(&profiles_ini_path)
+        .with_context(|| format!("Failed to load {:?}", profiles_ini_path))?;
 
-    Some(
-        base_dir
-            .join(profile_dir)
-            .join("sessionstore-backups")
-            .join("recovery.jsonlz4"),
-    )
+    let profile_dir = find_install_default(&conf)
+        .or_else(|| find_legacy_default(&conf))
+        .context("Could not find default profile in profiles.ini")?;
+
+    Ok(base_dir
+        .join(profile_dir)
+        .join("sessionstore-backups")
+        .join("recovery.jsonlz4"))
 }
 
 fn find_install_default(conf: &Ini) -> Option<String> {
