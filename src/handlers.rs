@@ -4,8 +4,8 @@ pub mod restore;
 pub mod save;
 
 use crate::cli::Commands;
-use anyhow::{Context, Result};
-use dialoguer::{Select, theme::ColorfulTheme};
+use anyhow::Result;
+use inquire::{InquireError, Select};
 
 pub fn handle_command(command: Commands) {
     match command {
@@ -42,7 +42,7 @@ pub fn handle_command(command: Commands) {
     }
 }
 
-fn select_workspace(action_name: &str) -> Result<Option<String>> {
+pub fn select_workspace(action_name: &str) -> Result<Option<String>> {
     let workspaces = crate::storage_operations::list_snapshots()?;
 
     if workspaces.is_empty() {
@@ -50,22 +50,19 @@ fn select_workspace(action_name: &str) -> Result<Option<String>> {
         return Ok(None);
     }
 
-    let Some(index) = choose_workspace(&workspaces, &action_name)? else {
-        println!("Operation cancelled.");
-        return Ok(None);
-    };
+    let prompt = format!(
+        "Select a workspace to {} (Esc to cancel)",
+        action_name.to_uppercase()
+    );
 
-    Ok(Some(workspaces[index].clone()))
-}
+    let selection = Select::new(&prompt, workspaces).prompt();
 
-fn choose_workspace(workspaces: &[String], action_name: &str) -> Result<Option<usize>> {
-    Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(format!(
-            "Select a workspace to {} (Use arrow keys and Enter, Esc to cancel)",
-            action_name.to_uppercase()
-        ))
-        .default(0)
-        .items(&workspaces)
-        .interact_opt()
-        .context("Error with elements selecting")
+    match selection {
+        Ok(choice) => Ok(Some(choice)),
+        Err(InquireError::OperationCanceled) | Err(InquireError::OperationInterrupted) => {
+            println!("Operation cancelled.");
+            Ok(None)
+        }
+        Err(e) => Err(anyhow::anyhow!("Error with elements selecting: {}", e)),
+    }
 }
