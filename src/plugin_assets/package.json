@@ -1,0 +1,14 @@
+{
+  "name": "devsnap-companion",
+  "displayName": "DevSnap Companion",
+  "description": "Live state tracker for DevSnap CLI",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./extension.js"
+}

@@ -10,9 +10,10 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+    Init,
     Save { name: String },
     Restore,
-    List,
     Delete,
     Show { name: String },
+    Close { name: String },
 }

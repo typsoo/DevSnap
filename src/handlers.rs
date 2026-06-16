@@ -1,4 +1,5 @@
 pub mod delete;
+pub mod init;
 pub mod restore;
 pub mod save;
 
@@ -8,6 +9,12 @@ use dialoguer::{Select, theme::ColorfulTheme};
 
 pub fn handle_command(command: Commands) {
     match command {
+        Commands::Init {} => {
+            if let Err(e) = init::handle_init() {
+                eprintln!("Error saving workspace: {}", e);
+            }
+        }
+
         Commands::Save { name } => {
             if let Err(e) = save::handle_save(name) {
                 eprintln!("Error saving workspace: {}", e);
@@ -17,9 +24,6 @@ pub fn handle_command(command: Commands) {
             if let Err(e) = restore::handle_restore() {
                 eprintln!("Error restoring workspace: {}", e);
             }
-        }
-        Commands::List => {
-            println!("Action: Delegate listing workspaces to backend");
         }
         Commands::Delete {} => {
             if let Err(e) = delete::handle_delete() {
@@ -31,6 +35,9 @@ pub fn handle_command(command: Commands) {
                 "Action: Delegate showing details for workspace '{}' to backend",
                 name
             );
+        }
+        Commands::Close { name } => {
+            println!("Action: Close selected app: '{}'", name);
         }
     }
 }
