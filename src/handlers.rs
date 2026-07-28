@@ -1,6 +1,7 @@
 pub mod delete;
 pub mod init;
 pub mod restore;
+pub mod rewrite;
 pub mod save;
 
 use crate::cli::Commands;
@@ -30,14 +31,11 @@ pub fn handle_command(command: Commands) {
                 eprintln!("Error deleting workspace: {}", e);
             }
         }
-        Commands::Show { name } => {
-            println!(
-                "Action: Delegate showing details for workspace '{}' to backend",
-                name
-            );
-        }
-        Commands::Close { name } => {
-            println!("Action: Close selected app: '{}'", name);
+
+        Commands::Rewrite {} => {
+            if let Err(e) = rewrite::handle_rewrite() {
+                eprintln!("Error rewriting workspace: {}", e);
+            }
         }
     }
 }

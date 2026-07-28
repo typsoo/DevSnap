@@ -3,22 +3,6 @@
 version = 4
 
 [[package]]
-name = "DevSnap"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "dirs",
- "inquire",
- "lz4_flex",
- "rust-ini",
- "serde",
- "serde_json",
- "sysinfo",
- "tempfile",
-]
-
-[[package]]
 name = "anstream"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -214,6 +198,22 @@ dependencies = [
  "quote",
  "rustc_version",
  "syn",
+]
+
+[[package]]
+name = "devsnap"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "dirs",
+ "inquire",
+ "lz4_flex",
+ "rust-ini",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "tempfile",
 ]
 
 [[package]]

@@ -14,6 +14,5 @@ pub enum Commands {
     Save { name: String },
     Restore,
     Delete,
-    Show { name: String },
-    Close { name: String },
+    Rewrite,
 }
